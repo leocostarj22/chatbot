@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <title>Demo Chat Widget</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; margin: 2rem; }
+    .box { border: 1px solid #ddd; padding: 1rem; border-radius: 8px; max-width: 600px; }
+    .muted { color: #666; }
+    code { background: #f4f4f4; padding: 2px 4px; border-radius: 4px; display: block; }
+  </style>
+</head>
+<body>
+  <h1>Teste do Widget de Chat</h1>
+  <div class="box">
+    <p class="muted">Esta página demonstra o widget carregado via script.</p>
+    <p>Snippet usado:</p>
+    <pre><code>&lt;script async src=&quot;/widget.js&quot; data-chat-id=&quot;1001&quot;&gt;&lt;/script&gt;</code></pre>
+  </div>
+
+  <!-- Widget -->
+  <script async src="/widget.js" data-chat-id="1001"></script>
+</body>
+</html>

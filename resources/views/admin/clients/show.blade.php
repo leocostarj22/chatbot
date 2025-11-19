@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+    <meta charset="utf-8">
+    <title>Snippet do Widget</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        code { background: #f4f4f4; padding: 2px 4px; border-radius: 4px; display: block; }
+    </style>
+</head>
+<body>
+    <h1>Snippet para o Cliente #{{ $client->id }} — {{ $client->name }}</h1>
+
+    @if (session('status'))
+        <p style="color:green">{{ session('status') }}</p>
+    @endif
+
+    @php
+        // Usa APP_URL se disponível; caso contrário, baseia-se na URL atual
+        $base = rtrim(config('app.url') ?: url('/'), '/');
+        // Não force https em ambiente local; mantenha o esquema de $base
+        $widgetSrc = $base . '/widget.js';
+        $script = '<script async src="'.$widgetSrc.'" data-chat-id="'.$client->id.'"></script>';
+    @endphp
+
+    <p>Copie e cole no site do cliente:</p>
+    <code>{{ htmlentities($script) }}</code>
+
+    <p>
+        <a href="{{ route('clients.settings.edit', $client) }}">Configurar Widget</a> |
+        <a href="{{ route('clients.index') }}">Voltar</a>
+    </p>
+
+    <h3>Preview Local</h3>
+    <p>Abra <code>{{ url('/demo.html') }}</code> para ver o widget rodando.</p>
+</body>
+</html>
