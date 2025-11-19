@@ -1,6 +1,7 @@
 (function () {
   const currentScript = document.currentScript;
-  const clientId = currentScript && currentScript.dataset && currentScript.dataset.chatId;
+  const publicKey = currentScript && currentScript.dataset && currentScript.dataset.publicKey;
+  const clientId = currentScript && currentScript.dataset && (currentScript.dataset.chatId || currentScript.dataset.clientId);
   if (!clientId) {
     console.error('[Chatbot] data-chat-id não definido no script tag.');
     return;
@@ -38,7 +39,10 @@
   }
 
   async function fetchSettings() {
-    const res = await fetch(API_BASE + '/api/widget/' + encodeURIComponent(clientId), {
+    const path = publicKey
+      ? ('/api/widget/key/' + encodeURIComponent(publicKey))
+      : ('/api/widget/' + encodeURIComponent(clientId));
+    const res = await fetch(API_BASE + path, {
       method: 'GET',
       credentials: 'omit',
       headers: { 'Content-Type': 'application/json' }
@@ -46,6 +50,7 @@
     if (!res.ok) throw new Error('Falha ao obter configurações do widget');
     const data = await res.json();
     state.settings = data.settings || {};
+    state.isOnline = !!data.is_online;
     return data;
   }
 
@@ -140,7 +145,9 @@
     header.style.color = state.settings.secondary_color || '#ffffff';
     header.style.padding = '12px';
     header.style.fontWeight = '600';
-    header.textContent = state.settings.online_message || 'Estamos online';
+    header.textContent = state.isOnline
+      ? (state.settings.online_message || 'Estamos online')
+      : (state.settings.offline_message || 'Estamos offline, deixe sua mensagem');
 
     const messages = document.createElement('div');
     messages.id = 'chatbot-messages';

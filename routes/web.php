@@ -4,14 +4,35 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\ClientController;
 use App\Http\Controllers\Admin\WidgetSettingController;
+use App\Http\Controllers\Admin\ConversationController;
+use App\Http\Controllers\AuthController;
 
 Route::get('/', function () {
     return view('welcome');
 });
-Route::get('/admin', [DashboardController::class, 'index'])->name('admin.dashboard');
 
-Route::prefix('admin')->group(function () {
-    Route::resource('clients', ClientController::class);
-    Route::get('clients/{client}/settings', [WidgetSettingController::class, 'edit'])->name('clients.settings.edit');
-    Route::put('clients/{client}/settings', [WidgetSettingController::class, 'update'])->name('clients.settings.update');
+// Rotas de autenticação (sessão)
+Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
+Route::post('/login', [AuthController::class, 'login']);
+Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+
+// Protege a rota do dashboard
+Route::get('/admin', [DashboardController::class, 'index'])
+    ->middleware('auth')
+    ->name('admin.dashboard');
+
+// Rotas do Admin protegidas por sessão e gates
+Route::middleware(['auth'])->prefix('admin')->group(function () {
+    // Gestão de cliente e configurações (apenas admin)
+    Route::middleware('can:manage-clients')->group(function () {
+        Route::resource('clients', ClientController::class);
+        Route::get('clients/{client}/settings', [WidgetSettingController::class, 'edit'])->name('clients.settings.edit');
+        Route::put('clients/{client}/settings', [WidgetSettingController::class, 'update'])->name('clients.settings.update');
+    });
+
+    // Conversas (admin e operador)
+    Route::middleware('can:access-conversations')->group(function () {
+        Route::get('conversations', [ConversationController::class, 'index'])->name('conversations.index');
+        Route::get('conversations/{conversation}', [ConversationController::class, 'show'])->name('conversations.show');
+    });
 });

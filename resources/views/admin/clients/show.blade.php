@@ -16,15 +16,20 @@
     @endif
 
     @php
-        // Usa APP_URL se disponível; caso contrário, baseia-se na URL atual
         $base = rtrim(config('app.url') ?: url('/'), '/');
-        // Não force https em ambiente local; mantenha o esquema de $base
         $widgetSrc = $base . '/widget.js';
-        $script = '<script async src="'.$widgetSrc.'" data-chat-id="'.$client->id.'"></script>';
+        $scriptPublic = '<script async src="'.$widgetSrc.'" data-public-key="'.$client->public_key.'"></script>';
+        $scriptId = '<script async src="'.$widgetSrc.'" data-chat-id="'.$client->id.'"></script>';
     @endphp
 
     <p>Copie e cole no site do cliente:</p>
     <code>{{ htmlentities($script) }}</code>
+
+    <h3>Snippet recomendado (chave pública)</h3>
+    <code>{{ htmlentities($scriptPublic) }}</code>
+
+    <h3>Alternativo (por ID)</h3>
+    <code>{{ htmlentities($scriptId) }}</code>
 
     <p>
         <a href="{{ route('clients.settings.edit', $client) }}">Configurar Widget</a> |

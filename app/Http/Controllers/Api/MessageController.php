@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Conversation;
 use App\Models\Message;
 use Illuminate\Http\Request;
+use App\Events\MessageCreated;
 
 class MessageController extends Controller
 {
@@ -57,7 +58,14 @@ class MessageController extends Controller
             'content' => $data['content'],
         ]);
 
-        // TODO: Broadcast (Echo) futuramente
+        // Broadcast para painel (operadores em tempo real)
+        MessageCreated::dispatch($conversation->id, [
+            'id' => $message->id,
+            'sender_type' => $message->sender_type,
+            'content' => $message->content,
+            'created_at' => $message->created_at,
+        ]);
+
         return response()->json([
             'conversation_id' => $conversation->id,
             'message' => $message,
