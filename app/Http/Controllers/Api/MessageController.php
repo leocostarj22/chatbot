@@ -12,7 +12,25 @@ class MessageController extends Controller
 {
     public function index(Request $request)
     {
+        $request->validate([
+            'conversation_id' => 'required|integer|exists:conversations,id',
+            'client_id' => 'nullable|integer',
+            'since' => 'nullable',
+        ]);
+
         $conversationId = (int) $request->query('conversation_id');
+        $conversation = Conversation::findOrFail($conversationId);
+
+        // Se informado client_id, garantir que bate com a conversa
+        if ($request->filled('client_id') && (int) $request->query('client_id') !== (int) $conversation->client_id) {
+            return response()->json(['error' => 'client_id inválido para a conversa'], 403);
+        }
+
+        // Se operador/admin autenticado, garantir escopo por client_id
+        if (auth()->check() && auth()->user()->client_id !== (int) $conversation->client_id) {
+            return response()->json(['error' => 'Acesso negado'], 403);
+        }
+
         $since = $request->query('since'); // ISO timestamp opcional
 
         $query = Message::where('conversation_id', $conversationId)->orderBy('created_at', 'asc');
@@ -41,7 +59,6 @@ class MessageController extends Controller
         if (!empty($data['conversation_id'])) {
             $conversation = Conversation::findOrFail($data['conversation_id']);
         } else {
-            // cria/recupera conversa por client_id + visitor_id
             if (empty($data['visitor_id'])) {
                 return response()->json(['error' => 'visitor_id requerido quando conversation_id não é informado'], 422);
             }
@@ -51,6 +68,21 @@ class MessageController extends Controller
             );
         }
 
+        // Garantir que client_id do payload bate com a conversa
+        if ((int) $data['client_id'] !== (int) $conversation->client_id) {
+            return response()->json(['error' => 'client_id inválido para a conversa'], 403);
+        }
+
+        // Envio por operador exige sessão e escopo correto
+        if ($data['sender_type'] === 'operator') {
+            if (!auth()->check()) {
+                return response()->json(['error' => 'Operador não autenticado'], 401);
+            }
+            if (auth()->user()->client_id !== (int) $conversation->client_id) {
+                return response()->json(['error' => 'Acesso negado'], 403);
+            }
+        }
+
         $message = Message::create([
             'conversation_id' => $conversation->id,
             'sender_type' => $data['sender_type'],
@@ -58,7 +90,6 @@ class MessageController extends Controller
             'content' => $data['content'],
         ]);
 
-        // Broadcast para painel (operadores em tempo real)
         MessageCreated::dispatch($conversation->id, [
             'id' => $message->id,
             'sender_type' => $message->sender_type,

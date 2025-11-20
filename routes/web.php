@@ -11,19 +11,19 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-// Rotas de autenticação (sessão)
+// Autenticação por sessão
 Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-// Protege a rota do dashboard
+// Dashboard protegido
 Route::get('/admin', [DashboardController::class, 'index'])
     ->middleware('auth')
     ->name('admin.dashboard');
 
-// Rotas do Admin protegidas por sessão e gates
+// Grupo admin com sessão e gates
 Route::middleware(['auth'])->prefix('admin')->group(function () {
-    // Gestão de cliente e configurações (apenas admin)
+    // Gestão de clientes e widget (somente admin)
     Route::middleware('can:manage-clients')->group(function () {
         Route::resource('clients', ClientController::class);
         Route::get('clients/{client}/settings', [WidgetSettingController::class, 'edit'])->name('clients.settings.edit');

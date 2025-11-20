@@ -14,6 +14,8 @@
         .error { color:#b00020; font-size:13px; margin: 6px 0 0; }
         .top { margin-bottom:16px; text-align:center; }
         .muted { font-size:13px; color:#666; margin-top:8px; text-align:center; }
+        .topbar { position:fixed; top:0; left:0; right:0; height:48px; display:flex; align-items:center; justify-content:flex-end; padding:0 16px; background:#fff; border-bottom:1px solid #eee; }
+        .logout-btn { background:#ef4444; color:#fff; border:none; padding:8px 12px; border-radius:6px; cursor:pointer; }
     </style>
 </head>
 <body>

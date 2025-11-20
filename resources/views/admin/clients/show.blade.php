@@ -38,5 +38,13 @@
 
     <h3>Preview Local</h3>
     <p>Abra <code>{{ url('/demo.html') }}</code> para ver o widget rodando.</p>
+
+    <!-- Topbar com botão Sair -->
+    <div style="position:sticky; top:0; background:#fff; border-bottom:1px solid #eee; padding:8px 12px; display:flex; justify-content:flex-end; align-items:center;">
+        <form method="POST" action="/logout" style="margin:0;">
+            <?php echo csrf_field(); ?>
+            <button type="submit" style="background:#ef4444; color:#fff; border:none; padding:8px 12px; border-radius:6px; cursor:pointer;">Sair</button>
+        </form>
+    </div>
 </body>
 </html>
